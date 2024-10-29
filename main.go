@@ -17,6 +17,78 @@ type CommitInfo struct {
 	Timestamp time.Time
 }
 
+func (c *CommitInfo) print() {
+	fmt.Printf("CommitInfo[Author: %s, Filename: %s, Timestamp: %s]\n",
+		c.Author, filepath.Base(c.Filename),
+		c.Timestamp.Format(time.RFC3339))
+}
+
+func (c *CommitInfo) logPrint() {
+	fmt.Printf("%s %s %s\n", c.Author, filepath.Base(c.Filename),
+		c.Timestamp.Format(time.RFC3339))
+}
+
+type CommitInfoAgg struct {
+	AuthorCounts map[string]int
+	Filename     string
+}
+
+// aggregateByFile aggregates CommitInfo data into a map where the key is the filename
+// and the value is a list of authors who committed to that file.
+func aggregateByFile(commits []CommitInfo) map[string][]string {
+	// Initialize the map to hold filenames as keys and list of authors as values
+	aggregated := make(map[string][]string)
+
+	for _, commit := range commits {
+		// Check if the filename already exists in the map
+		if authors, exists := aggregated[commit.Filename]; exists {
+			// Add the author if they are not already in the list
+			if !contains(authors, commit.Author) {
+				aggregated[commit.Filename] = append(authors, commit.Author)
+			}
+		} else {
+			// Initialize the list with the current author
+			aggregated[commit.Filename] = []string{commit.Author}
+		}
+	}
+
+	return aggregated
+}
+
+// aggregateByFile aggregates CommitInfo data into a map where the key is the filename
+// and the value is a list of authors who committed to that file.
+func aggregateCountsByFile(commits []CommitInfo) map[string]map[string]int {
+	// Initialize the map to hold filenames as keys and list of authors as values
+	aggregated := make(map[string]map[string]int)
+
+	for _, commit := range commits {
+		// Check if the filename already exists in the map
+		if _, exists := aggregated[commit.Filename]; !exists {
+			aggregated[commit.Filename] = make(map[string]int)
+		}
+
+		// inc the author count
+		if _, exists := aggregated[commit.Filename][commit.Author]; !exists {
+			aggregated[commit.Filename][commit.Author] = 0
+		}
+
+		aggregated[commit.Filename][commit.Author]++
+
+	}
+
+	return aggregated
+}
+
+// Helper function to check if a slice contains a specific string
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
+
 func main() {
 	repoPath := "."                               //"/Users/davidwright/Documents/javascript-dev/trebsirk.github.io" // Define local repo directory
 	repoURL := "https://github.com/user/repo.git" // Replace with your repo URL
@@ -76,9 +148,31 @@ func main() {
 		log.Fatalf("Failed to iterate commits: %v", err)
 	}
 
+	fmt.Println("commits")
 	// Output the commit information
 	for _, commit := range commits {
-		fmt.Printf("Author: %s, Filename: %s, Timestamp: %s\n",
-			commit.Author, filepath.Base(commit.Filename), commit.Timestamp)
+		//commit.print()
+		commit.logPrint()
 	}
+	fmt.Println()
+
+	fmt.Println("aggregations")
+
+	// Aggregate the commit data by filename
+	aggregated := aggregateByFile(commits)
+
+	// Print the aggregated data
+	for filename, authors := range aggregated {
+		fmt.Printf("File: %s, Authors: %v\n", filename, authors)
+	}
+
+	fmt.Println()
+
+	aggregatedCounts := aggregateCountsByFile(commits)
+	for filename, authorCountMap := range aggregatedCounts {
+		for author, count := range authorCountMap {
+			fmt.Printf("File: %s, Author: %s, Count: %d\n", filename, author, count)
+		}
+	}
+
 }
