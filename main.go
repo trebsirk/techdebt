@@ -114,8 +114,7 @@ func calculateEntropy(data []int) float64 {
 	// Calculate the entropy
 	var entropy float64
 
-	for obj, p := range ps {
-		fmt.Printf("probability of %d = %f\n", obj, p)
+	for _, p := range ps {
 		entropy += -p * math.Log2(p)
 	}
 	return entropy
@@ -205,7 +204,7 @@ func calcEntroyByFile(commits []CommitInfo) {
 
 	aggregatedCounts := aggregateCountsByFile(commits)
 
-	fmt.Printf("aggregatedCounts %v\n", aggregatedCounts)
+	// fmt.Printf("aggregatedCounts %v\n", aggregatedCounts)
 	fileEntropy := make([]FileEntropy, 0)
 	for filename, authorCountMap := range aggregatedCounts {
 		arr := []int{}
@@ -218,8 +217,15 @@ func calcEntroyByFile(commits []CommitInfo) {
 		fileEntropy = append(fileEntropy, FileEntropy{filename, entropy})
 	}
 
-	fmt.Printf("Entropy:\n%v\n", fileEntropy)
+	totalEntropy := 0.0
+	for _, fe := range fileEntropy {
+		totalEntropy = totalEntropy + fe.Entropy
+	}
+	avgEntropy := totalEntropy / float64(len(fileEntropy))
 
+	fmt.Printf("Repo Entropy (average of all files):%f\n", avgEntropy)
+
+	fmt.Println("file entropies:")
 	printFileEntropySlice(fileEntropy)
 
 }
@@ -317,7 +323,6 @@ func main() {
 	// 	}
 	// }
 
-	calcEntroyDemo()
 	fmt.Println()
 	calcEntroyByFile(commits)
 
