@@ -6,18 +6,9 @@ import (
 	"math"
 	"os"
 	"techdebt/components/commitinfo"
-	"techdebt/components/entropy"
 	"techdebt/components/git"
+	"techdebt/components/helpers"
 )
-
-type FileEntropy struct {
-	Filename string  `json:"filename"`
-	Entropy  float64 `json:"entropy"`
-}
-
-func (fe *FileEntropy) printWithFormatting(colWidth int) {
-	fmt.Printf("%-{colWidth}s\n", fe.Filename)
-}
 
 // writeFileEntropies writes a slice of FileEntropy structs to a file in JSON format.
 func writeFileEntropies(filename string, entropies []FileEntropy) error {
@@ -34,41 +25,13 @@ func writeFileEntropies(filename string, entropies []FileEntropy) error {
 
 	return nil
 }
-func makeProbabilitiesFromOccurances(data []int) map[int]float64 {
-	// data is occurances, eg [0 1 1 3 0 2 2 1 0]
-	// where 0,1,2,3 are observation indices
-	ps := make(map[int]float64)
-	counts := make(map[int]int)
-	total := len(data)
-	for _, obj := range data {
-		counts[obj]++
-	}
-	for obj, c := range counts {
-		ps[obj] = float64(c) / float64(total)
-	}
-	return ps
-}
-
-func makeProbabilitiesFromCounts(data []int) []float64 {
-	// data is occurances, eg [3 4 0]
-	// where 3,4,0 are counts for each index
-	ps := make([]float64, len(data))
-	total := 0
-	for _, count := range data {
-		total = total + count
-	}
-	for i, c := range data {
-		ps[i] = float64(c) / float64(total)
-	}
-	return ps
-}
 
 func calculateEntropy(data []int) float64 {
 	if len(data) == 0 {
 		return 0.0
 	}
 
-	ps := makeProbabilitiesFromCounts(data)
+	ps := helpers.MakeProbabilitiesFromCounts(data)
 
 	// Calculate the entropy
 	var entropy float64
@@ -143,16 +106,6 @@ func aggregateCountsByFile(commits []commitinfo.CommitInfo) map[string]map[strin
 	return aggregated
 }
 
-// Helper function to check if a slice contains a specific string
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
-}
-
 func calcEntroyDemo() {
 	arr := []int{1, 1, 2, 2, 3, 3, 3}
 	entropy := calculateEntropy(arr)
@@ -185,7 +138,7 @@ func calcEntroyByFile(commits []CommitInfo) {
 	fmt.Printf("Repo Entropy (average of all files):%f\n", avgEntropy)
 
 	fmt.Println("file entropies:")
-	entropy.PrintFileEntropySlice(fileEntropy)
+	printFileEntropySlice(fileEntropy)
 
 }
 
