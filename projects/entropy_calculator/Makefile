@@ -1,6 +1,6 @@
 # Define directories
-PROJECT_NAME := entropy_calculator
-SRC_DIR := ../../bases/entropy
+PROJECT_NAME := entropy
+SRC_DIR := .
 BIN_DIR := bin
 BIN := $(BIN_DIR)/$(PROJECT_NAME)
 

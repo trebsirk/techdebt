@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/go-git/go-git"
-	"github.com/go-git/go-git/plumbing/object"
+	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 
 	"techdebt/components/commitinfo"
 )
@@ -67,4 +67,5 @@ func GetCommits(repoPath string) []commitinfo.CommitInfo {
 	if err != nil {
 		log.Fatalf("Failed to iterate commits: %v", err)
 	}
+	return commits
 }

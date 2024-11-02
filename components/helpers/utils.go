@@ -1,5 +1,7 @@
 package helpers
 
+type TypeProb float32
+
 // Contains checks if a slice contains a specific string.
 func Contains(slice []string, item string) bool {
 	for _, s := range slice {
@@ -35,32 +37,29 @@ func transformOccurancesToCounts(data []int) []int {
 	return counts
 }
 
-func MakeProbabilitiesFromOccurances(data []int) []float64 {
+func MakeProbabilitiesFromOccurances(data []int) []TypeProb {
 	// data is occurances, eg [0 1 1 3 0 2 2 1 0]
 	// where 0,1,2,3 are observation indices
 	var counts []int
-	var probs []float64
+	var probs []TypeProb
 
 	counts = transformOccurancesToCounts(data)
 	probs = MakeProbabilitiesFromCounts(counts)
 	return probs
 }
 
-func MakeProbabilitiesFromCounts(data []int) []float64 {
+func MakeProbabilitiesFromCounts(data []int) []TypeProb {
 	// data is occurances, eg [3 4 0]
 	// where 3,4,0 are counts for each index
-	var total int
-	var probs []float64
-
-	probs = make([]float64, len(data))
-	total = 0
+	var total int = 0
+	var probs []TypeProb = make([]TypeProb, len(data))
 
 	for _, count := range data {
 		total = total + count
 	}
 
 	for i, c := range data {
-		probs[i] = float64(c) / float64(total)
+		probs[i] = TypeProb(c) / TypeProb(total)
 	}
 
 	return probs

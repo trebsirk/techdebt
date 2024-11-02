@@ -1,6 +1,6 @@
 # Define directories
 PROJECT_NAME := git-debt
-SRC_DIR := ../../bases/git-debt
+SRC_DIR := .
 BIN_DIR := bin
 BIN := $(BIN_DIR)/$(PROJECT_NAME)
 
