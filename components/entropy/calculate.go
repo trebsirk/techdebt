@@ -5,27 +5,27 @@ import (
 	"techdebt/components/helpers"
 )
 
-type prob_t float32
-
 // CalculateEntropy calculates the entropy of an array of integers.
-func CalculateEntropyOfProbabilities(ps []helpers.TypeProb) prob_t {
+func CalculateEntropyOfProbabilities(ps []helpers.TypeProb) helpers.TypeProb {
 	// ps is a list of probabilities that sum to one
 
 	if len(ps) == 0 {
 		return 0.0
 	}
 
-	var entropy prob_t
+	var entropy helpers.TypeProb
 
 	for _, p := range ps {
-		entropy += prob_t(float64(p) * math.Log2(1.0/float64(p)))
+		if p != 0.0 {
+			entropy += helpers.TypeProb(float64(p) * math.Log2(1.0/float64(p)))
+		}
 	}
 
 	return entropy
 }
 
 // CalculateEntropy calculates the entropy of an array of integers.
-func CalculateEntropyOfOccurances(data []int) prob_t {
+func CalculateEntropyOfOccurances(data []int) helpers.TypeProb {
 	// data is a list of probabilities that sum to one
 
 	if len(data) == 0 {
@@ -40,10 +40,10 @@ func CalculateEntropyOfOccurances(data []int) prob_t {
 		probs[i] = helpers.TypeProb(p)
 	}
 
-	return prob_t(CalculateEntropyOfProbabilities(probs))
+	return helpers.TypeProb(CalculateEntropyOfProbabilities(probs))
 }
 
-func CalculateEntropyOfCounts(data []int) prob_t {
+func CalculateEntropyOfCounts(data []int) helpers.TypeProb {
 	// data is a list of probabilities that sum to one
 
 	if len(data) == 0 {
@@ -58,5 +58,5 @@ func CalculateEntropyOfCounts(data []int) prob_t {
 		probs[i] = helpers.TypeProb(p)
 	}
 
-	return prob_t(CalculateEntropyOfProbabilities(probs))
+	return helpers.TypeProb(CalculateEntropyOfProbabilities(probs))
 }

@@ -70,7 +70,11 @@ func aggregateByFileWithRepeats(commits []commitinfo.CommitInfo) map[string][]st
 // aggregateByFile aggregates CommitInfo data into a map where the key is the filename
 // and the value is a list of authors who committed to that file.
 func aggregateCountsByFile(commits []commitinfo.CommitInfo) map[string]map[string]int {
-	// Initialize the map to hold filenames as keys and list of authors as values
+	// Initialize the map
+	// {
+	//  filename1: {author1: 1, author2: 6},
+	//  filename2: {author0: 5, author1: 3}
+	// }
 	aggregated := make(map[string]map[string]int)
 
 	for _, commit := range commits {
@@ -89,6 +93,74 @@ func aggregateCountsByFile(commits []commitinfo.CommitInfo) map[string]map[strin
 	}
 
 	return aggregated
+}
+
+func transformMapCountsToArray(countmap map[string]int) []int {
+	var res []int
+	var i int
+
+	res = make([]int, len(countmap))
+	i = 0
+	for _, count := range countmap {
+		res[i] = count
+		i++
+	}
+
+	return res
+}
+
+// aggregateByFile aggregates CommitInfo data into a map where the key is the filename
+// and the value is a list of authors who committed to that file.
+func aggregateAuthorCounts(commits []commitinfo.CommitInfo) map[string]int {
+	// Initialize the map
+	// {
+	//  author0: 5,
+	//  author1: 1, ...
+	// }
+	aggregated := make(map[string]int)
+
+	for _, commit := range commits {
+		if _, exists := aggregated[commit.Author]; !exists {
+			aggregated[commit.Author] = 0
+		}
+		aggregated[commit.Author]++
+	}
+
+	return aggregated
+}
+
+func aggregateFileCounts(commits []commitinfo.CommitInfo) map[string]int {
+	// Initialize the map
+	// {
+	//  author0: 5,
+	//  author1: 1, ...
+	// }
+	aggregated := make(map[string]int)
+
+	for _, commit := range commits {
+		if _, exists := aggregated[commit.Filename]; !exists {
+			aggregated[commit.Filename] = 0
+		}
+		aggregated[commit.Filename]++
+	}
+
+	return aggregated
+}
+
+func calcRepoEntropy(commits []commitinfo.CommitInfo) float64 {
+	// entropy by author
+	agg_counts_map := aggregateAuthorCounts(commits)
+	agg_counts_arr := transformMapCountsToArray(agg_counts_map)
+	entropy_author := float64(entropy.CalculateEntropyOfCounts(agg_counts_arr))
+	fmt.Printf("author entropy: %.3f\n", entropy_author)
+
+	// entropy by file
+	agg_counts_map = aggregateFileCounts(commits)
+	agg_counts_arr = transformMapCountsToArray(agg_counts_map)
+	entropy_file := float64(entropy.CalculateEntropyOfCounts(agg_counts_arr))
+	fmt.Printf("file entropy: %.3f\n", entropy_file)
+
+	return (entropy_file + entropy_author) / 2.0
 }
 
 func calcEntroyDemo() {
@@ -137,6 +209,8 @@ func main() {
 	}
 
 	var commits []commitinfo.CommitInfo = git.GetCommits(repoPath)
+	var overallEntropy float64 = calcRepoEntropy(commits)
+	fmt.Printf("overallEntropy = %f\n", overallEntropy)
 
 	fmt.Println("commits")
 	// Output the commit information
@@ -164,27 +238,27 @@ func main() {
 	// 	}
 	// }
 
-	fmt.Println()
-	// entropy.CalculateEntropy(commits)
+	// fmt.Println()
+	// // entropy.CalculateEntropy(commits)
 
-	// calcEntroyByFile(commits)
-	fmt.Println(commits)
+	// // calcEntroyByFile(commits)
+	// fmt.Println(commits)
 
-	fmt.Println("Optimizations")
-	arr := []int{5, 3, 1}
-	e := entropy.CalculateEntropyOfCounts(arr)
-	fmt.Printf("Entropy for %v: %.4f\n", arr, e)
+	// fmt.Println("Optimizations")
+	// arr := []int{5, 3, 1}
+	// e := entropy.CalculateEntropyOfCounts(arr)
+	// fmt.Printf("Entropy for %v: %.4f\n", arr, e)
 
-	arr = []int{6, 3, 1}
-	e = entropy.CalculateEntropyOfCounts(arr)
-	fmt.Printf("Entropy for %v: %.4f\n", arr, e)
+	// arr = []int{6, 3, 1}
+	// e = entropy.CalculateEntropyOfCounts(arr)
+	// fmt.Printf("Entropy for %v: %.4f\n", arr, e)
 
-	arr = []int{5, 4, 1}
-	e = entropy.CalculateEntropyOfCounts(arr)
-	fmt.Printf("Entropy for %v: %.4f\n", arr, e)
+	// arr = []int{5, 4, 1}
+	// e = entropy.CalculateEntropyOfCounts(arr)
+	// fmt.Printf("Entropy for %v: %.4f\n", arr, e)
 
-	arr = []int{5, 3, 2}
-	e = entropy.CalculateEntropyOfCounts(arr)
-	fmt.Printf("Entropy for %v: %.4f\n", arr, e)
+	// arr = []int{5, 3, 2}
+	// e = entropy.CalculateEntropyOfCounts(arr)
+	// fmt.Printf("Entropy for %v: %.4f\n", arr, e)
 
 }
